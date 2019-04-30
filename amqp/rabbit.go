@@ -15,7 +15,31 @@ func Connect(host string, port int) *amqp.Connection {
 
 	log.FailOnError(err, "Failed to connect to RabbitMQ")
 
-	defer conn.Close()
+	defer closeConnection(conn)
 
 	return conn
+}
+
+func Channel(connection amqp.Connection) {
+	channel, err := connection.Channel()
+
+	log.FailOnError(err, "Failed to create channel")
+
+	defer closeChannel(channel)
+}
+
+func closeConnection(connection *amqp.Connection) {
+	err := connection.Close()
+
+	if err != nil {
+		log.FailOnError(err, "Failed to close connection")
+	}
+}
+
+func closeChannel(channel *amqp.Channel) {
+	err := channel.Close()
+
+	if err != nil {
+		log.FailOnError(err, "Failed to close connection")
+	}
 }
