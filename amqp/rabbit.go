@@ -8,8 +8,8 @@ import (
 	"github.com/exilesprx/event-system/log"
 )
 
-func Connect(host string, port int) *amqp.Connection {
-	url := fmt.Sprintf("amqp://guest:guest@%s:%d", host, port)
+func Connect(user string, password, host string, port int) *amqp.Connection {
+	url := fmt.Sprintf("amqp://%s:%s@%s:%d", user, password, host, port)
 
 	conn, err := amqp.Dial(url)
 
