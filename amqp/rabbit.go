@@ -10,7 +10,13 @@ import (
 	"github.com/exilesprx/event-system/log"
 )
 
-func Connect() *amqp.Connection {
+type Rabbit struct {
+	connection *amqp.Connection
+	queue amqp.Queue
+	channel *amqp.Channel
+}
+
+func (rabbit *Rabbit) Connect() {
 	user := os.Getenv("AMQP_USER")
 
 	password := os.Getenv("AMQP_PASSWORD")
@@ -19,7 +25,38 @@ func Connect() *amqp.Connection {
 
 	port, _ := strconv.Atoi(os.Getenv("AMQP_PORT"))
 
-	return connect(user, password, host, port)
+	rabbit.connection = connect(user, password, host, port)
+}
+
+func (rabbit *Rabbit) DeclareQueue(name string) {
+	rabbit.channel = channel(rabbit.connection)
+
+	q, err := rabbit.channel.QueueDeclare(
+		name,
+		false,
+		false,
+		false,
+		false,
+		nil)
+
+	if err != nil {
+		log.FailOnError(err, "Failed to declare queue")
+	}
+
+	rabbit.queue = q
+}
+
+func (rabbit *Rabbit) Consume() <-chan amqp.Delivery {
+	messages, _ := rabbit.channel.Consume(
+		rabbit.queue.Name,
+		"",
+		true,
+		false,
+		false,
+		false,
+		nil)
+
+	return messages
 }
 
 func connect(user string, password, host string, port int) *amqp.Connection {
@@ -34,12 +71,14 @@ func connect(user string, password, host string, port int) *amqp.Connection {
 	return conn
 }
 
-func channel(connection amqp.Connection) {
+func channel(connection *amqp.Connection) *amqp.Channel {
 	channel, err := connection.Channel()
 
 	log.FailOnError(err, "Failed to create channel")
 
 	defer closeChannel(channel)
+
+	return channel
 }
 
 func closeConnection(connection *amqp.Connection) {

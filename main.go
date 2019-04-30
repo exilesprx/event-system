@@ -2,6 +2,7 @@ package main
 
 import (
 	"github.com/exilesprx/event-system/amqp"
+	"os"
 
 	"github.com/exilesprx/event-system/log"
 
@@ -11,7 +12,13 @@ import (
 func main() {
 	loadEnv()
 
-	amqp.Connect()
+	rabbit := amqp.Rabbit{}
+
+	rabbit.Connect()
+
+	rabbit.DeclareQueue(os.Getenv("AMQP_CHANNEL"))
+
+	rabbit.Consume()
 }
 
 func loadEnv() {
