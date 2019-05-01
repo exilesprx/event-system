@@ -2,18 +2,16 @@ package amqp
 
 import (
 	"fmt"
+	"github.com/exilesprx/event-system/log"
+	"github.com/streadway/amqp"
 	"os"
 	"strconv"
-
-	"github.com/streadway/amqp"
-
-	"github.com/exilesprx/event-system/log"
 )
 
 type Rabbit struct {
 	connection *amqp.Connection
-	queue amqp.Queue
-	channel *amqp.Channel
+	queue      amqp.Queue
+	channel    *amqp.Channel
 }
 
 func (rabbit *Rabbit) Connect() {

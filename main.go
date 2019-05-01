@@ -2,11 +2,9 @@ package main
 
 import (
 	"github.com/exilesprx/event-system/amqp"
-	"os"
-
 	"github.com/exilesprx/event-system/log"
-
 	"github.com/joho/godotenv"
+	"os"
 )
 
 func main() {
