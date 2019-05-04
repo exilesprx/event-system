@@ -17,8 +17,6 @@ func (app *Application) Run() {
 }
 
 func startAmqpServer(app *Application) {
-	app.rabbit.Connect()
-
 	defer app.rabbit.Close()
 
 	app.rabbit.Work()
