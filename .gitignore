@@ -1,3 +1,8 @@
 .env
-
 .idea/*
+
+# Ignore the vendor directory
+vendor/*
+
+# Ignore the build file
+event-system
