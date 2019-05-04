@@ -57,10 +57,18 @@ func (rabbit *Rabbit) Consume() <-chan amqp.Delivery {
 	return messages
 }
 
-func (rabbit *Rabbit) Close() {
-	closeConnection(rabbit.connection)
+func (rabbit *Rabbit) Work() {
+	rabbit.Connect()
 
+	rabbit.DeclareQueue(os.Getenv("AMQP_CHANNEL"))
+
+	rabbit.Consume()
+}
+
+func (rabbit *Rabbit) Close() {
 	closeChannel(rabbit.channel)
+
+	closeConnection(rabbit.connection)
 }
 
 func connect(user string, password, host string, port int) *amqp.Connection {
@@ -93,6 +101,6 @@ func closeChannel(channel *amqp.Channel) {
 	err := channel.Close()
 
 	if err != nil {
-		log.FailOnError(err, "Failed to close connection")
+		log.FailOnError(err, "Failed to close channel")
 	}
 }
