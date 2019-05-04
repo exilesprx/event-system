@@ -17,6 +17,8 @@ func main() {
 	rabbit.DeclareQueue(os.Getenv("AMQP_CHANNEL"))
 
 	rabbit.Consume()
+
+	defer rabbit.Close()
 }
 
 func loadEnv() {

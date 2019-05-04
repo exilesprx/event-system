@@ -57,14 +57,18 @@ func (rabbit *Rabbit) Consume() <-chan amqp.Delivery {
 	return messages
 }
 
+func (rabbit *Rabbit) Close() {
+	closeConnection(rabbit.connection)
+
+	closeChannel(rabbit.channel)
+}
+
 func connect(user string, password, host string, port int) *amqp.Connection {
 	url := fmt.Sprintf("amqp://%s:%s@%s:%d", user, password, host, port)
 
 	conn, err := amqp.Dial(url)
 
 	log.FailOnError(err, "Failed to connect to RabbitMQ")
-
-	defer closeConnection(conn)
 
 	return conn
 }
@@ -73,8 +77,6 @@ func channel(connection *amqp.Connection) *amqp.Channel {
 	channel, err := connection.Channel()
 
 	log.FailOnError(err, "Failed to create channel")
-
-	defer closeChannel(channel)
 
 	return channel
 }
