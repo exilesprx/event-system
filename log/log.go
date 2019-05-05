@@ -11,5 +11,5 @@ func FailOnError(err error, msg string) {
 }
 
 func Print(message string) {
-	log.Printf(message)
+	log.Println(message)
 }

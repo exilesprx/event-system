@@ -2,6 +2,14 @@
 
 
 [[projects]]
+  branch = "master"
+  digest = "1:e2a1ff1174d564ed4b75a62757f4a9081ed3b8c99ed17e47eb252b048b4ff018"
+  name = "github.com/asaskevich/EventBus"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "d46933a94f05c6657d7b923fcf5ac563ee37ec79"
+
+[[projects]]
   digest = "1:ecd9aa82687cf31d1585d4ac61d0ba180e42e8a6182b85bd785fcca8dfeefc1b"
   name = "github.com/joho/godotenv"
   packages = ["."]
@@ -21,6 +29,7 @@
   analyzer-name = "dep"
   analyzer-version = 1
   input-imports = [
+    "github.com/asaskevich/EventBus",
     "github.com/joho/godotenv",
     "github.com/streadway/amqp",
   ]

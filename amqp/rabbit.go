@@ -65,6 +65,8 @@ func (rabbit *Rabbit) Work() {
 
 	rabbit.DeclareQueue(os.Getenv("AMQP_CHANNEL"))
 
+	rabbit.processor.Setup()
+
 	process := rabbit.Consume()
 
 	log.Print("Working...")
