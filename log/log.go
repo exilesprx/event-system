@@ -9,3 +9,7 @@ func FailOnError(err error, msg string) {
 		log.Fatalf("%s: %s", msg, err)
 	}
 }
+
+func Print(message string) {
+	log.Printf(message)
+}

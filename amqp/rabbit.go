@@ -12,6 +12,7 @@ type Rabbit struct {
 	connection *amqp.Connection
 	queue      amqp.Queue
 	channel    *amqp.Channel
+	processor  MessageProcessor
 }
 
 func (rabbit *Rabbit) Connect() {
@@ -37,14 +38,12 @@ func (rabbit *Rabbit) DeclareQueue(name string) {
 		false,
 		nil)
 
-	if err != nil {
-		log.FailOnError(err, "Failed to declare queue")
-	}
+	log.FailOnError(err, "Failed to declare queue")
 
 	rabbit.queue = q
 }
 
-func (rabbit *Rabbit) Consume() <-chan amqp.Delivery {
+func (rabbit *Rabbit) Consume() chan bool {
 	messages, _ := rabbit.channel.Consume(
 		rabbit.queue.Name,
 		"",
@@ -54,7 +53,11 @@ func (rabbit *Rabbit) Consume() <-chan amqp.Delivery {
 		false,
 		nil)
 
-	return messages
+	forever := make(chan bool)
+
+	go rabbit.processor.Process(messages)
+
+	return forever
 }
 
 func (rabbit *Rabbit) Work() {
@@ -62,7 +65,11 @@ func (rabbit *Rabbit) Work() {
 
 	rabbit.DeclareQueue(os.Getenv("AMQP_CHANNEL"))
 
-	rabbit.Consume()
+	process := rabbit.Consume()
+
+	log.Print("Working...")
+
+	<-process
 }
 
 func (rabbit *Rabbit) Close() {
@@ -92,15 +99,11 @@ func channel(connection *amqp.Connection) *amqp.Channel {
 func closeConnection(connection *amqp.Connection) {
 	err := connection.Close()
 
-	if err != nil {
-		log.FailOnError(err, "Failed to close connection")
-	}
+	log.FailOnError(err, "Failed to close connection")
 }
 
 func closeChannel(channel *amqp.Channel) {
 	err := channel.Close()
 
-	if err != nil {
-		log.FailOnError(err, "Failed to close channel")
-	}
+	log.FailOnError(err, "Failed to close channel")
 }

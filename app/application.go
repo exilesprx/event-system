@@ -25,7 +25,5 @@ func startAmqpServer(app *Application) {
 func loadEnv() {
 	err := godotenv.Load()
 
-	if err != nil {
-		log.FailOnError(err, "Could not load env file")
-	}
+	log.FailOnError(err, "Could not load env file")
 }
