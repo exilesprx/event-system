@@ -10,15 +10,18 @@ import (
 
 type MessageProcessor struct {
 	bus EventBus.Bus
-	handler events.EventHandler
 }
 
-func (processor *MessageProcessor) Setup() {
-	processor.bus = EventBus.New()
+func NewMessageProcessor() MessageProcessor {
+	processor := MessageProcessor{
+		bus: EventBus.New(),
+	}
 
-	processor.handler.Setup()
+	return processor
+}
 
-	for topic, handler := range processor.handler.GetTopics() {
+func (processor *MessageProcessor) RegisterHandlers(handlers map[string]events.Handler) {
+	for topic, handler := range handlers {
 		err := processor.bus.Subscribe(topic, handler.Handle)
 
 		log.FailOnError(err, "An error occurred")

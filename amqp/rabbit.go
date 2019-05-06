@@ -4,26 +4,15 @@ import (
 	"fmt"
 	"github.com/exilesprx/event-system/log"
 	"github.com/streadway/amqp"
-	"os"
-	"strconv"
 )
 
 type Rabbit struct {
 	connection *amqp.Connection
 	queue      amqp.Queue
 	channel    *amqp.Channel
-	processor  MessageProcessor
 }
 
-func (rabbit *Rabbit) Connect() {
-	user := os.Getenv("AMQP_USER")
-
-	password := os.Getenv("AMQP_PASSWORD")
-
-	host := os.Getenv("AMQP_HOST")
-
-	port, _ := strconv.Atoi(os.Getenv("AMQP_PORT"))
-
+func (rabbit *Rabbit) Connect(user string, password string, host string, port int) {
 	rabbit.connection = connect(user, password, host, port)
 }
 
@@ -43,7 +32,7 @@ func (rabbit *Rabbit) DeclareQueue(name string) {
 	rabbit.queue = q
 }
 
-func (rabbit *Rabbit) Consume() chan bool {
+func (rabbit *Rabbit) Consume() <- chan amqp.Delivery {
 	messages, _ := rabbit.channel.Consume(
 		rabbit.queue.Name,
 		"",
@@ -53,25 +42,21 @@ func (rabbit *Rabbit) Consume() chan bool {
 		false,
 		nil)
 
-	forever := make(chan bool)
-
-	go rabbit.processor.Process(messages)
-
-	return forever
+	return messages
 }
 
-func (rabbit *Rabbit) Work() {
-	rabbit.Connect()
+func (rabbit *Rabbit) Work(channel string, processor MessageProcessor) {
+	rabbit.DeclareQueue(channel)
 
-	rabbit.DeclareQueue(os.Getenv("AMQP_CHANNEL"))
+	messages := rabbit.Consume()
 
-	rabbit.processor.Setup()
+	forever := make(chan bool)
 
-	process := rabbit.Consume()
+	go processor.Process(messages)
 
 	log.Print("Working...")
 
-	<-process
+	<-forever
 }
 
 func (rabbit *Rabbit) Close() {
