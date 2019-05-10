@@ -11,19 +11,20 @@ import (
 )
 
 type Application struct {
+	rabbit amqp.Rabbit
 }
 
 func (app *Application) Run() {
 	loadEnv()
 
-	rabbit := startAmqpServer()
-
-	defer rabbit.Close()
-
-	rabbit.Work(os.Getenv("AMQP_CHANNEL"), setupEventProcessor())
+	app.startAmqpServer()
 }
 
-func startAmqpServer() amqp.Rabbit {
+func (app *Application) Shutdown() {
+	defer app.rabbit.Close()
+}
+
+func (app *Application) startAmqpServer() {
 	user := os.Getenv("AMQP_USER")
 
 	password := os.Getenv("AMQP_PASSWORD")
@@ -36,7 +37,11 @@ func startAmqpServer() amqp.Rabbit {
 
 	rabbit.Connect(user, password, host, port)
 
-	return rabbit
+	processor := setupEventProcessor()
+
+	rabbit.Work(os.Getenv("AMQP_CHANNEL"), processor)
+
+	app.rabbit = rabbit
 }
 
 func setupEventProcessor() amqp.MessageProcessor {

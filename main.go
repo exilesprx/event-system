@@ -8,4 +8,6 @@ func main() {
 	application := app.Application{}
 
 	application.Run()
+
+	defer application.Shutdown()
 }
